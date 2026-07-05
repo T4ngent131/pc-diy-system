@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from "vue-router"
+﻿import { createRouter, createWebHashHistory } from "vue-router"
 
 const routes = [
   // ── 用户端（主入口） ──
