@@ -1,0 +1,39 @@
+﻿# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# MySQL data (local dev)
+.mysql-data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp files
+jd*.html
+bing.html
+*.tmp
+gen_sql.mjs
+
+# Java compiled classes
+backend/target/

@@ -1,0 +1,25 @@
+﻿#!/usr/bin/env bash
+# Maven Wrapper
+
+MAVEN_HOME="$(cd "$(dirname "$0")/.." >/dev/null 2>&1 && pwd)"
+MAVEN_JAR="$MAVEN_HOME/.mvn/wrapper/maven-wrapper.jar"
+MAVEN_PROPERTIES="$MAVEN_HOME/.mvn/wrapper/maven-wrapper.properties"
+
+downloadMavenWrapper() {
+  local url=$(grep "wrapperUrl" "$MAVEN_PROPERTIES" | cut -d= -f2- | tr -d " ")
+  echo "Downloading Maven Wrapper from $url"
+  if command -v curl &> /dev/null; then
+    curl -sSL "$url" -o "$MAVEN_JAR"
+  elif command -v wget &> /dev/null; then
+    wget -q "$url" -O "$MAVEN_JAR"
+  else
+    echo "Neither curl nor wget found. Please install Maven manually."
+    exit 1
+  fi
+}
+
+if [ ! -f "$MAVEN_JAR" ]; then
+  downloadMavenWrapper
+fi
+
+exec java -jar "$MAVEN_JAR" "$@"
