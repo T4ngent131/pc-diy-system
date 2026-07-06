@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/',
+  base: './',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -19,5 +19,8 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  build: {
+    outDir: 'dist',
   },
 })

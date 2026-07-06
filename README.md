@@ -47,9 +47,35 @@ npm run dev
 
 ## 部署
 
-前端已配置 GitHub Actions，推送至 `main` 分支后自动构建部署到 Pages。
+### 纯静态托管
 
-后端暂不支持云端部署，需自行配置服务器。
+这个版本适合直接托管成静态站点，不再依赖后端。
+
+1. 本地执行：
+
+```bash
+npm run build
+```
+
+2. 把生成的 `dist/` 上传到：
+- `Cloudflare Pages`
+- `Netlify`
+- `GitHub Pages`
+
+3. 如果用 `GitHub Pages`，当前项目已切换为 `hash` 路由，刷新不会 404。
+
+### 推荐方式
+
+- **最快**：`Cloudflare Pages`
+- **最省事**：`GitHub Pages`
+- **最适合 SPA**：`Netlify`
+
+### GitHub Pages
+
+1. 把代码推到 `main`
+2. 到仓库 `Settings -> Pages`
+3. `Build and deployment` 选择 `GitHub Actions`
+4. 推送后自动发布到 Pages
 
 ## 数据
 
