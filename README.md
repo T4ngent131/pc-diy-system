@@ -74,8 +74,9 @@ npm run build
 
 1. 把代码推到 `main`
 2. 到仓库 `Settings -> Pages`
-3. `Build and deployment` 选择 `GitHub Actions`
-4. 推送后自动发布到 Pages
+3. `Build and deployment` 选择 `Deploy from a branch`
+4. 分支选 `gh-pages`，目录选 `/ (root)`
+5. 推送后自动发布到 Pages
 
 ## 数据
 
