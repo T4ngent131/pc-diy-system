@@ -2,8 +2,10 @@
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), cloudflare()],
   base: '/pc-diy-system/',
   resolve: {
     alias: {
