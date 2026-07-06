@@ -37,3 +37,9 @@ gen_sql.mjs
 
 # Java compiled classes
 backend/target/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
