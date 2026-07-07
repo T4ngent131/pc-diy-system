@@ -16,20 +16,7 @@ const routes = [
     ],
   },
 
-  // ── 管理后台 ──
-  {
-    path: "/admin",
-    component: () => import("@/components/layout/AppLayout.vue"),
-    redirect: "/admin/dashboard",
-    children: [
-      { path: "dashboard", name: "Dashboard", component: () => import("@/views/Dashboard.vue"), meta: { title: "工作台" } },
-      { path: "config", name: "ConfigBuilder", component: () => import("@/views/config/ConfigBuilder.vue"), meta: { title: "配置方案" } },
-      { path: "inventory", name: "Inventory", component: () => import("@/views/inventory/Inventory.vue"), meta: { title: "库存管理" } },
-      { path: "orders", name: "Orders", component: () => import("@/views/orders/Orders.vue"), meta: { title: "订单管理" } },
-      { path: "knowledge", name: "Knowledge", component: () => import("@/views/knowledge/Knowledge.vue"), meta: { title: "知识库" } },
-      { path: "knowledge/:id", name: "ArticleDetail", component: () => import("@/views/knowledge/ArticleDetail.vue"), meta: { title: "文章详情" } },
-    ],
-  },
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ]
 
 const router = createRouter({

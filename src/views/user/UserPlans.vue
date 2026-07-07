@@ -15,7 +15,7 @@
           <div class="plan-detail-price">
             <span class="price-label">参考总价</span>
             <span class="price-value">¥{{ plan.price.toLocaleString() }}</span>
-            <router-link to="/build" class="plan-use-btn" @click="loadPlan(plan)">使用此方案</router-link>
+            <router-link to="/build" class="plan-use-btn" @click.prevent="loadPlan(plan)">使用此方案</router-link>
           </div>
         </div>
 
@@ -55,26 +55,17 @@ const configStore = useConfigStore()
 
 function loadPlan(plan) {
   configStore.clearConfig()
-  Object.entries(plan.config).forEach(([type, id]) => {
-    if (id && componentsData[type]) {
-      const item = componentsData[type].find((c) => c.id === id)
-      if (item) {
-        // We need to set this on the build page
-        // Store the plan data for the build page to use
-        sessionStorage.setItem("planConfig", JSON.stringify({ type, id: item.id }))
-      }
-    }
-  })
-  // Store complete plan in sessionStorage
+  const resolvedConfig = Object.fromEntries(
+    Object.entries(plan.config).map(([type, id]) => {
+      const items = componentsData[type]
+      const item = items?.find((c) => c.id === id) || null
+      return [type, item]
+    })
+  )
+
   sessionStorage.setItem("selectedPlan", JSON.stringify({
     ...plan,
-    config: Object.fromEntries(
-      Object.entries(plan.config).map(([type, id]) => {
-        const items = componentsData[type]
-        const item = items?.find((c) => c.id === id)
-        return [type, item || null]
-      })
-    )
+    config: resolvedConfig,
   }))
 }
 </script>

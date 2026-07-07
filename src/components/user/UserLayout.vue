@@ -14,7 +14,6 @@
           <router-link to="/build" class="nav-link" active-class="active">自定义装机</router-link>
           <router-link to="/plans" class="nav-link" active-class="active">推荐配置</router-link>
           <router-link to="/guides" class="nav-link" active-class="active">选购指南</router-link>
-          <router-link to="/track" class="nav-link" active-class="active">订单查询</router-link>
         </div>
 
         <div class="nav-actions">
@@ -32,7 +31,6 @@
         <router-link to="/build" class="mobile-link" @click="mobileOpen = false">自定义装机</router-link>
         <router-link to="/plans" class="mobile-link" @click="mobileOpen = false">推荐配置</router-link>
         <router-link to="/guides" class="mobile-link" @click="mobileOpen = false">选购指南</router-link>
-        <router-link to="/track" class="mobile-link" @click="mobileOpen = false">订单查询</router-link>
         <router-link to="/order" class="mobile-cta" @click="mobileOpen = false">开始装机</router-link>
       </div>
     </nav>
@@ -71,7 +69,6 @@
           </div>
           <div class="footer-col">
             <h4>关于</h4>
-            <router-link to="/track">订单查询</router-link>
           </div>
         </div>
         <div class="footer-bottom">

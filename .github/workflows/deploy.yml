@@ -21,6 +21,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_BASE_PATH: /pc-diy-system/
 
       - name: Disable Jekyll
         run: touch dist/.nojekyll

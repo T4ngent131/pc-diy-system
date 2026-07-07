@@ -180,6 +180,22 @@ const currentConfig = reactive({
 
 const orderForm = reactive({ name: "", phone: "", note: "" })
 
+function restoreSelectedPlan() {
+  const rawPlan = sessionStorage.getItem("selectedPlan")
+  if (!rawPlan) return
+
+  try {
+    const savedPlan = JSON.parse(rawPlan)
+    Object.entries(savedPlan.config || {}).forEach(([type, item]) => {
+      if (item) currentConfig[type] = item
+    })
+    sessionStorage.removeItem("selectedPlan")
+  } catch (error) {
+    console.warn("恢复推荐配置失败:", error)
+    sessionStorage.removeItem("selectedPlan")
+  }
+}
+
 const componentTypes = computed(() =>
   Object.entries(componentLabels).map(([key, val]) => ({ key, label: val.name, icon: val.icon }))
 )
@@ -223,6 +239,10 @@ function getSpecs(item) {
 function selectItem(item) {
   currentConfig[activeCategory.value] = item
 }
+
+onMounted(() => {
+  restoreSelectedPlan()
+})
 
 function handleSubmit() {
   if (filledCount.value < 4) {

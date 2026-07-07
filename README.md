@@ -11,13 +11,6 @@
 - **选购指南** - CPU/显卡/内存选购知识
 - **订单查询** - 查看订单状态
 
-### 管理后台 `/admin`
-- **工作台** - 数据总览、快捷操作
-- **配置管理** - 高级配置构建器
-- **库存管理** - 入库/出库、低库存预警
-- **订单管理** - 订单状态流转
-- **知识库** - 文章管理
-
 ## 技术栈
 
 | 前端 | 后端 | 数据库 |
@@ -45,6 +38,46 @@ npm run dev
 
 访问 http://localhost:5173
 
+### 纯静态托管
+
+这个版本适合直接托管成静态站点，不再依赖后端。
+
+1. 本地执行：
+
+```bash
+npm run build
+```
+
+2. 把生成的 `dist/` 上传到：
+- `Cloudflare Pages`
+- `Netlify`
+- `GitHub Pages`
+
+3. 如果用 `Cloudflare Pages` 或 `Netlify`，直接保持默认 `/` 即可。
+4. 如果用 `GitHub Pages` 项目页，构建时设置 `VITE_BASE_PATH=/pc-diy-system/`
+
+### 推荐方式
+
+- **最快**：`Cloudflare Pages`
+- **最省事**：`GitHub Pages`
+- **最适合 SPA**：`Netlify`
+
+### GitHub Pages
+
+1. 把代码推到 `main`
+2. 到仓库 `Settings -> Pages`
+3. `Build and deployment` 选择 `Deploy from a branch`
+4. 分支选 `gh-pages`，目录选 `/ (root)`
+5. 推送后自动发布到 Pages
+6. 如果是项目页地址 `https://用户名.github.io/仓库名/`，构建时设置 `VITE_BASE_PATH=/仓库名/`
+
+### Cloudflare Pages 备用地址
+
+1. 新建 Cloudflare Pages 项目
+2. 选择当前仓库
+3. Build command：`npm run build`
+4. Build variable：`VITE_BASE_PATH=/`
+5. Output directory：`dist`
 
 ## 数据
 
