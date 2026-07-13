@@ -260,7 +260,7 @@
 export const componentLabels = {
   cpu: { name: "CPU 处理器", icon: "Cpu" },
   gpu: { name: "显卡", icon: "Monitor" },
-  motherboard: { name: "主板", icon: "CircuitBoard" },
+  motherboard: { name: "主板", icon: "DataBoard" },
   ram: { name: "内存", icon: "Coin" },
   storage: { name: "存储", icon: "Folder" },
   psu: { name: "电源", icon: "Connection" },
