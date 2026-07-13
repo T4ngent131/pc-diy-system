@@ -5,6 +5,19 @@ USE pc_diy_dump;
 CREATE DATABASE IF NOT EXISTS pc_diy DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE pc_diy;
 
+-- 用户表
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password_hash VARCHAR(128) NOT NULL COMMENT '密码哈希',
+    phone VARCHAR(20) DEFAULT NULL COMMENT '手机号',
+    role VARCHAR(20) DEFAULT 'user' COMMENT '角色: user/admin',
+    status TINYINT DEFAULT 1 COMMENT '状态 1正常 0禁用',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
 -- 配件表
 CREATE TABLE IF NOT EXISTS components (
     id VARCHAR(32) PRIMARY KEY COMMENT '配件编号, 如 cpu-001',

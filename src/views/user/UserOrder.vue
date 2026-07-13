@@ -78,6 +78,7 @@
             type="primary"
             style="width:100%;margin-top:12px"
             :disabled="!canSubmit"
+            :loading="submitting"
             @click="handleSubmit"
           >
             提交订单
@@ -92,23 +93,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue"
+import { ref, reactive, computed, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { recommendedBuilds } from "@/api/user.js"
 import { useConfigStore } from "@/stores/config.js"
 import { useOrderStore } from "@/stores/orders.js"
 import { useInventoryStore } from "@/stores/inventory.js"
+import { useAuthStore } from "@/stores/auth.js"
 import { ElMessage } from "element-plus"
 
 const router = useRouter()
 const configStore = useConfigStore()
 const orderStore = useOrderStore()
 const inventoryStore = useInventoryStore()
+const authStore = useAuthStore()
 
 const form = reactive({ name: "", phone: "", wechat: "", note: "" })
 const configSource = ref("plan")
 const selectedPlan = ref(null)
 const selectedConfig = ref(null)
+const submitting = ref(false)
 
 const plans = recommendedBuilds
 
@@ -132,7 +136,16 @@ const orderPrice = computed(() => {
 
 const canSubmit = computed(() => form.name && form.phone && (selectedPlan.value || selectedConfig.value !== null))
 
-function handleSubmit() {
+onMounted(async () => {
+  if (authStore.user) {
+    form.name = authStore.user.username || form.name
+    form.phone = authStore.user.phone || form.phone
+  }
+  await orderStore.fetchOrders()
+  await inventoryStore.fetchComponents()
+})
+
+async function handleSubmit() {
   let configData, totalPrice, configNames
 
   if (configSource.value === "plan" && selectedPlanDetail.value) {
@@ -153,24 +166,43 @@ function handleSubmit() {
     configData = cfg.config
   }
 
-  // Create order
-  orderStore.addOrder({
-    customer: form.name,
-    config: configNames,
-    totalPrice,
-    phone: form.phone,
-    note: `微信: ${form.wechat || "无"} · ${form.note || "无"}`,
-  })
-
-  // Deduct stock
-  if (configData) {
-    Object.entries(configData).forEach(([type, item]) => {
-      if (item && item.id) inventoryStore.reduceStock(type, item.id, 1)
+  submitting.value = true
+  try {
+    await orderStore.addOrder({
+      customer: form.name,
+      config: configNames,
+      totalPrice,
+      phone: form.phone,
+      wechat: form.wechat,
+      note: form.note,
+      items: buildOrderItems(configData),
     })
-  }
 
-  ElMessage.success("订单提交成功！我们将尽快联系您确认配置。")
-  router.push("/track")
+    if (!orderStore.backendReady && configData) {
+      for (const [type, item] of Object.entries(configData)) {
+        const componentId = typeof item === "string" ? item : item?.id
+        if (componentId) await inventoryStore.reduceStock(type, componentId, 1, "订单扣减")
+      }
+    }
+
+    ElMessage.success("订单提交成功！我们将尽快联系您确认配置。")
+    router.push("/track")
+  } catch (error) {
+    ElMessage.error(error.message || "订单提交失败")
+  } finally {
+    submitting.value = false
+  }
+}
+
+function buildOrderItems(configData) {
+  if (!configData) return []
+
+  return Object.entries(configData)
+    .filter(([, item]) => item?.id || typeof item === "string")
+    .map(([type, item]) => ({
+      type,
+      componentId: typeof item === "string" ? item : item.id,
+    }))
 }
 </script>
 

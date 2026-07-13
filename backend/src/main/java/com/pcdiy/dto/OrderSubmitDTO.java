@@ -1,6 +1,7 @@
 package com.pcdiy.dto;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class OrderSubmitDTO {
@@ -10,6 +11,5 @@ public class OrderSubmitDTO {
     private String note;
     private java.math.BigDecimal totalPrice;
 
-    // configItems: {"cpu":"cpu-001","gpu":"gpu-001",...}
-    private String configItems;
+    private List<ConfigSubmitDTO.ComponentItem> items;
 }

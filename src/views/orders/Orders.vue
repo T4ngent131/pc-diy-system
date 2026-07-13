@@ -9,7 +9,7 @@
 
     <!-- 订单列表 -->
     <el-card>
-      <el-table :data="orderStore.orders" stripe highlight-current-row>
+      <el-table :data="orderStore.orders" stripe highlight-current-row v-loading="orderStore.loading">
         <el-table-column prop="id" label="订单号" width="180">
           <template #default="{ row }">
             <span style="font-weight:500;font-size:0.85rem;font-family:var(--font-mono)">{{ row.id }}</span>
@@ -36,7 +36,7 @@
         </el-table-column>
         <el-table-column label="状态" width="120" align="center">
           <template #default="{ row }">
-            <el-dropdown @command="(s) => orderStore.updateStatus(row.id, s)">
+            <el-dropdown @command="(s) => handleStatusChange(row.id, s)">
               <el-tag :type="orderStore.statusColorMap[row.status] || 'info'" size="small" style="cursor:pointer">
                 {{ row.status }} <el-icon><ArrowDown /></el-icon>
               </el-tag>
@@ -85,14 +85,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showNewOrder = false">取消</el-button>
-        <el-button type="primary" :disabled="!canSubmit" @click="handleCreateOrder">创建订单</el-button>
+        <el-button type="primary" :disabled="!canSubmit" :loading="submitting" @click="handleCreateOrder">创建订单</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed } from "vue"
+import { reactive, ref, computed, onMounted } from "vue"
 import { useOrderStore } from "@/stores/orders.js"
 import { useConfigStore } from "@/stores/config.js"
 import { useInventoryStore } from "@/stores/inventory.js"
@@ -103,6 +103,7 @@ const orderStore = useOrderStore()
 const configStore = useConfigStore()
 const inventoryStore = useInventoryStore()
 const showNewOrder = ref(false)
+const submitting = ref(false)
 
 const newOrder = reactive({
   customer: "",
@@ -116,28 +117,53 @@ const estimatedPrice = computed(() => {
 
 const canSubmit = computed(() => newOrder.customer && newOrder.configIndex !== null)
 
-function handleCreateOrder() {
+onMounted(async () => {
+  await orderStore.fetchOrders()
+  await inventoryStore.fetchComponents()
+})
+
+async function handleStatusChange(id, status) {
+  try {
+    await orderStore.updateStatus(id, status)
+    ElMessage.success("订单状态已更新")
+  } catch (error) {
+    ElMessage.error(error.message || "订单状态更新失败")
+  }
+}
+
+async function handleCreateOrder() {
   const cfg = configStore.savedConfigs[newOrder.configIndex]
   const configNames = {}
   Object.entries(cfg.config).forEach(([key, val]) => {
     if (val) configNames[key] = `${val.brand} ${val.model}`
   })
 
-  orderStore.addOrder({
-    customer: newOrder.customer,
-    config: configNames,
-    totalPrice: cfg.totalPrice,
-  })
+  submitting.value = true
+  try {
+    await orderStore.addOrder({
+      customer: newOrder.customer,
+      config: configNames,
+      totalPrice: cfg.totalPrice,
+      items: Object.entries(cfg.config)
+        .filter(([, item]) => item?.id)
+        .map(([type, item]) => ({ type, componentId: item.id })),
+    })
 
-  // 扣减库存
-  Object.entries(cfg.config).forEach(([type, item]) => {
-    if (item) inventoryStore.reduceStock(type, item.id, 1)
-  })
+    if (!orderStore.backendReady) {
+      for (const [type, item] of Object.entries(cfg.config)) {
+        if (item) await inventoryStore.reduceStock(type, item.id, 1, "订单扣减")
+      }
+    }
 
-  ElMessage.success("订单创建成功")
-  showNewOrder.value = false
-  newOrder.customer = ""
-  newOrder.configIndex = null
+    ElMessage.success("订单创建成功")
+    showNewOrder.value = false
+    newOrder.customer = ""
+    newOrder.configIndex = null
+  } catch (error) {
+    ElMessage.error(error.message || "订单创建失败")
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 

@@ -12,7 +12,7 @@ import java.util.List;
 public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMapper, InventoryRecord> implements InventoryRecordService {
 
     @Override
-    public void recordIn(String componentId, String componentName, int quantity, int beforeStock, int afterStock, String operator) {
+    public void recordIn(String componentId, String componentName, int quantity, int beforeStock, int afterStock, String remark) {
         InventoryRecord record = new InventoryRecord();
         record.setComponentId(componentId);
         record.setComponentName(componentName);
@@ -20,12 +20,13 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         record.setQuantity(quantity);
         record.setBeforeStock(beforeStock);
         record.setAfterStock(afterStock);
-        record.setOperator(operator);
+        record.setRemark(remark);
+        record.setOperator("system");
         save(record);
     }
 
     @Override
-    public void recordOut(String componentId, String componentName, int quantity, int beforeStock, int afterStock, String operator) {
+    public void recordOut(String componentId, String componentName, int quantity, int beforeStock, int afterStock, String remark) {
         InventoryRecord record = new InventoryRecord();
         record.setComponentId(componentId);
         record.setComponentName(componentName);
@@ -33,7 +34,8 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         record.setQuantity(quantity);
         record.setBeforeStock(beforeStock);
         record.setAfterStock(afterStock);
-        record.setOperator(operator);
+        record.setRemark(remark);
+        record.setOperator("system");
         save(record);
     }
 

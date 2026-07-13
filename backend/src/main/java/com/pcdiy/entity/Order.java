@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Data
 @TableName("orders")
@@ -25,4 +26,7 @@ public class Order {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+
+    @TableField(exist = false)
+    private Map<String, String> config;
 }

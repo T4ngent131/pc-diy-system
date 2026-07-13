@@ -17,6 +17,16 @@
         </div>
 
         <div class="nav-actions">
+          <template v-if="authStore.isLoggedIn">
+            <span class="user-pill">
+              <el-icon><User /></el-icon>
+              {{ authStore.user?.username }}
+            </span>
+            <el-button link type="primary" @click="handleLogout">退出</el-button>
+          </template>
+          <template v-else>
+            <router-link to="/auth?mode=login" class="login-link">登录</router-link>
+          </template>
           <router-link to="/order" class="cta-button">开始装机</router-link>
         </div>
 
@@ -31,6 +41,8 @@
         <router-link to="/build" class="mobile-link" @click="mobileOpen = false">自定义装机</router-link>
         <router-link to="/plans" class="mobile-link" @click="mobileOpen = false">推荐配置</router-link>
         <router-link to="/guides" class="mobile-link" @click="mobileOpen = false">选购指南</router-link>
+        <router-link v-if="!authStore.isLoggedIn" to="/auth?mode=login" class="mobile-link" @click="mobileOpen = false">登录 / 注册</router-link>
+        <button v-else class="mobile-link mobile-button" @click="handleLogout">退出登录</button>
         <router-link to="/order" class="mobile-cta" @click="mobileOpen = false">开始装机</router-link>
       </div>
     </nav>
@@ -82,12 +94,24 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue"
+import { useRouter } from "vue-router"
+import { ElMessage } from "element-plus"
+import { useAuthStore } from "@/stores/auth.js"
 
+const router = useRouter()
+const authStore = useAuthStore()
 const isScrolled = ref(false)
 const mobileOpen = ref(false)
 
 function handleScroll() {
   isScrolled.value = window.scrollY > 20
+}
+
+function handleLogout() {
+  authStore.logout()
+  mobileOpen.value = false
+  ElMessage.success("已退出登录")
+  router.push("/")
 }
 
 onMounted(() => window.addEventListener("scroll", handleScroll, { passive: true }))
@@ -172,6 +196,24 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll))
   transition: all 0.2s;
 }
 .cta-button:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+.login-link {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.login-link:hover { color: var(--color-primary); }
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 140px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .mobile-toggle { display: none; background: none; border: none; cursor: pointer; color: var(--color-text-primary); padding: 4px; }
 
 /* Mobile Menu */
@@ -183,12 +225,19 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll))
 }
 .mobile-link {
   display: block;
+  width: 100%;
   padding: 10px 0;
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   text-decoration: none;
   border-bottom: 1px solid var(--color-border-soft);
+}
+.mobile-button {
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 .mobile-cta {
   display: block;

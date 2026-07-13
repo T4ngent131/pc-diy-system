@@ -7,7 +7,7 @@
 
     <!-- 订单列表 -->
     <el-card>
-      <el-table :data="orderStore.orders" stripe highlight-current-row>
+      <el-table :data="orderStore.orders" stripe highlight-current-row v-loading="orderStore.loading">
         <el-table-column prop="id" label="订单号" width="190">
           <template #default="{ row }">
             <span style="font-family:var(--font-mono);font-weight:500;font-size:0.85rem">{{ row.id }}</span>
@@ -63,9 +63,14 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue"
 import { useOrderStore } from "@/stores/orders.js"
 
 const orderStore = useOrderStore()
+
+onMounted(() => {
+  orderStore.fetchOrders()
+})
 
 const statusSteps = [
   { icon: "Edit", label: "待确认", desc: "订单已提交，等待客服确认配件可用性", color: "var(--color-warning)" },

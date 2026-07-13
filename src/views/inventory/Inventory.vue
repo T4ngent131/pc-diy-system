@@ -32,7 +32,7 @@
 
     <!-- 库存列表 -->
     <el-card>
-      <el-table :data="filteredData" stripe highlight-current-row>
+      <el-table :data="filteredData" stripe highlight-current-row v-loading="inventoryStore.loading">
         <el-table-column label="配件类型" width="120">
           <template #default="{ row }">
             <el-tag size="small">{{ row._typeLabel }}</el-tag>
@@ -79,17 +79,20 @@
         <el-form-item label="数量">
           <el-input-number v-model="form.quantity" :min="1" :max="100" />
         </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="form.remark" placeholder="例如：到货补库存、客户订单出库" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirm">确认</el-button>
+        <el-button type="primary" :loading="submitting" @click="handleConfirm">确认</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useInventoryStore } from "@/stores/inventory.js"
 import { componentLabels } from "@/api/components.js"
 import { ElMessage } from "element-plus"
@@ -99,7 +102,8 @@ const filterType = ref("")
 const searchText = ref("")
 const dialogVisible = ref(false)
 const dialogAction = ref("")
-const form = ref({ item: null, quantity: 1 })
+const form = ref({ item: null, quantity: 1, remark: "" })
+const submitting = ref(false)
 
 const allItems = computed(() => {
   const items = []
@@ -141,29 +145,41 @@ function getSpecText(item) {
 
 function handleRestock(item) {
   dialogAction.value = "restock"
-  form.value = { item, quantity: 1 }
+  form.value = { item, quantity: 1, remark: "" }
   dialogVisible.value = true
 }
 
 function handleReduce(item) {
   dialogAction.value = "reduce"
-  form.value = { item, quantity: 1 }
+  form.value = { item, quantity: 1, remark: "" }
   dialogVisible.value = true
 }
 
-function handleConfirm() {
-  const { item, quantity } = form.value
-  if (dialogAction.value === "restock") {
-    inventoryStore.restock(item._type, item.id, quantity)
-    ElMessage.success(`入库 ${quantity} 件 ${item.brand} ${item.model}`)
-  } else {
-    if (inventoryStore.reduceStock(item._type, item.id, quantity)) {
+onMounted(async () => {
+  await inventoryStore.fetchComponents()
+  if (inventoryStore.backendReady) {
+    await inventoryStore.fetchRecords()
+  }
+})
+
+async function handleConfirm() {
+  const { item, quantity, remark } = form.value
+  submitting.value = true
+  try {
+    if (dialogAction.value === "restock") {
+      await inventoryStore.restock(item._type, item.id, quantity, remark || "手动入库")
+      ElMessage.success(`入库 ${quantity} 件 ${item.brand} ${item.model}`)
+    } else if (await inventoryStore.reduceStock(item._type, item.id, quantity, remark || "手动出库")) {
       ElMessage.success(`出库 ${quantity} 件 ${item.brand} ${item.model}`)
     } else {
       ElMessage.error("库存不足")
     }
+    dialogVisible.value = false
+  } catch (error) {
+    ElMessage.error(error.message || "库存操作失败")
+  } finally {
+    submitting.value = false
   }
-  dialogVisible.value = false
 }
 </script>
 
